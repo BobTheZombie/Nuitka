@@ -1947,6 +1947,11 @@ def _shallUseStaticLibPython():
     if shallMakeModule():
         return False, "not used in module mode"
 
+    env_lpm_mode = os.environ.get("LPM_MODE")
+
+    if env_lpm_mode and env_lpm_mode.strip().lower() not in ("", "0", "false", "no", "off"):
+        return True, "LPM mode requested static libpython"
+
     if options.static_libpython == "auto":
         result = _couldUseStaticLibPython()
 

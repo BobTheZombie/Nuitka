@@ -23,15 +23,20 @@ class NuitkaPluginStandardLibraryCompleteness(NuitkaPluginBase):
         "hashlib",
         "_hashlib",
         "ssl",
+        "_ssl",
         "sqlite3",
+        "_sqlite3",
         "datetime",
+        "_datetime",
         "_decimal",
         "_struct",
+        "_io",
         "binascii",
         "zlib",
         "select",
         "multiprocessing",
         "asyncio",
+        "_asyncio",
     )
 
     @staticmethod
@@ -46,7 +51,7 @@ class NuitkaPluginStandardLibraryCompleteness(NuitkaPluginBase):
         else:
             normalized = value.strip().lower()
 
-        self.must_include = normalized not in (None, "", "0", "false")
+        self.must_include = normalized not in (None, "", "0", "false", "no", "off")
         self.mustInclude = self.must_include
 
     def onModuleDiscovered(self, module):

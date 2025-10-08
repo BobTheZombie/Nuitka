@@ -38,6 +38,24 @@ from nuitka.Tracing import (
     scons_logger,
     setQuiet,
 )
+
+
+def _appendStaticLibPython(env):
+    if not env.static_libpython:
+        return
+
+    static_lib_node = env.File(env.static_libpython)
+
+    env.Append(
+        _LIBFLAGS=[
+            "-Wl,--whole-archive",
+            static_lib_node.get_abspath(),
+            "-Wl,--no-whole-archive",
+        ]
+    )
+
+    if env.gcc_mode or env.clang_mode:
+        env.AppendUnique(LINKFLAGS=["-static-libgcc", "-static-libstdc++", "-pthread"])
 from nuitka.utils.FileOperations import (
     changeFilenameExtension,
     getFilenameExtension,
@@ -530,7 +548,7 @@ if os.name == "nt":
         if "compile_flags" in link_data:
             env.Append(CFLAGS=link_data["compile_flags"])
     elif env.gcc_mode and env.static_libpython:
-        env.Append(LIBS=[env.File(env.static_libpython)])
+        _appendStaticLibPython(env)
     else:
         # Some non CPython flavors on Windows have this.
         if not env.msys2_mingw_python:
@@ -571,7 +589,7 @@ elif env.exe_mode or env.dll_mode:
         if "compile_flags" in link_data:
             env.Append(CFLAGS=link_data["compile_flags"])
     elif env.static_libpython:
-        env.Append(LIBS=[env.File(env.static_libpython)])
+        _appendStaticLibPython(env)
 
         # The linker won't succeed in searching for those for system Python of Debian
         # compiled Pythons. Help that. spell-checker: ignore rdynamic,Xlinker,pthread
@@ -610,7 +628,12 @@ elif env.exe_mode or env.dll_mode:
     # and AIX don't have it, but some Python flavors like Standalone Python
     # won't find it unless provided like this, so lets try to add this by
     # default and remove OSes that give errors one by one.
-    if not isFreeBSD() and not isMacOS() and not isAIX():
+    if (
+        not env.static_libpython
+        and not isFreeBSD()
+        and not isMacOS()
+        and not isAIX()
+    ):
         env.Append(LINKFLAGS=["-Wl,-rpath=" + python_lib_path])
 
 if isMacOS():

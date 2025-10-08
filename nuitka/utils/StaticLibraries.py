@@ -8,6 +8,7 @@
 import glob
 import os
 
+from nuitka.build.BackendPythonStaticLib import detectStaticLibPython
 from nuitka.containers.OrderedSets import OrderedSet
 from nuitka.PythonFlavors import (
     isAnacondaPython,
@@ -112,6 +113,11 @@ def _getSysConfigVarLIBPL():
 
 def _getSystemStaticLibPythonPath():
     # Return driven function with many cases, pylint: disable=too-many-branches,too-many-return-statements
+
+    lpm_candidate = detectStaticLibPython()
+
+    if lpm_candidate:
+        return lpm_candidate
 
     sys_prefix = getSystemPrefixPath()
     python_abi_version = python_version_str + getPythonABI()
