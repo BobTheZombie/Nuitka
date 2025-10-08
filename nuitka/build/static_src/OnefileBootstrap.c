@@ -961,7 +961,12 @@ static int runPythonCodeDLL(filename_char_t const *dll_filename, int argc, nativ
 #else
     typedef int (*nuitka_dll_function_ptr)(int, native_command_line_argument_t **);
 
-    void *handle = dlopen(dll_filename, RTLD_LOCAL | RTLD_NOW);
+    // The payload DLL contains the embedded Python runtime. Its symbols must be
+    // visible to subsequently loaded extension modules (e.g. ``math.so`` or the
+    // hashlib backends) to resolve symbols like ``PyFloat_Type``. Using
+    // ``RTLD_LOCAL`` hides these, causing import errors at runtime, so make sure
+    // to promote them to global scope.
+    void *handle = dlopen(dll_filename, RTLD_GLOBAL | RTLD_NOW);
 
     if (unlikely(handle == NULL)) {
         const char *error = dlerror();
