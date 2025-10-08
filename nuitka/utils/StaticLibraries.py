@@ -5,6 +5,7 @@
 
 """
 
+import glob
 import os
 
 from nuitka.containers.OrderedSets import OrderedSet
@@ -114,6 +115,25 @@ def _getSystemStaticLibPythonPath():
 
     sys_prefix = getSystemPrefixPath()
     python_abi_version = python_version_str + getPythonABI()
+
+    lpm_sysroot = os.environ.get("LPM_SYSROOT")
+
+    if lpm_sysroot:
+        sysroot_lib_dir = os.path.join(lpm_sysroot, "usr", "lib")
+
+        candidate = os.path.join(
+            sysroot_lib_dir, "libpython" + python_abi_version + ".a"
+        )
+
+        if os.path.exists(candidate):
+            return candidate
+
+        pattern = os.path.join(sysroot_lib_dir, "libpython%s*.a" % python_version_str)
+
+        matches = sorted(glob.glob(pattern))
+
+        if matches:
+            return matches[0]
 
     if isNuitkaPython():
         # Nuitka Python has this.
