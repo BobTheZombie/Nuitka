@@ -21,6 +21,24 @@
 Plugins are a feature to modify the way how Nuitka compiles Python
 programs in extremely flexible ways.
 
+LPM mode
+========
+
+Some build environments want to make sure Nuitka always bundles certain
+standard library extension modules (``_hashlib``, ``sqlite3`` and
+friends). Nuitka's built-in ``standard-library`` plugin does that when the
+environment variable ``LPM_MODE`` is set to a truthy value (``1``, ``true``,
+etc.). That plugin is enabled automatically, so you only need to provide
+the variable on the command line or in your environment before running
+Nuitka::
+
+   export LPM_MODE=1  # Unix shells
+   set LPM_MODE=1     # Windows cmd.exe
+   $env:LPM_MODE = 1  # Windows PowerShell
+
+Any non-empty value except ``0`` or ``false`` enables the LPM behaviour for
+that invocation. Unset or clear ``LPM_MODE`` to fall back to the default.
+
 Plugins can automatically include data files and additional shared
 libraries, import modules which are not detectable by source code
 analysis, modify or extend the to-be-compiled source code, gather
