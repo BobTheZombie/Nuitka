@@ -15,9 +15,9 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 #
-""" Nuitka version related stuff.
+"""Nuitka version related utilities."""
 
-"""
+import os
 
 version_string = """\
 Nuitka V2.8rc16
@@ -79,7 +79,17 @@ def getNuitkaVersionYear():
 
 
 def getCommercialVersion():
-    """Return Nuitka commercial version if installed."""
+    """Return Nuitka commercial version if installed.
+
+    This also honors the ``NUITKA_COMMERCIAL_VERSION`` environment variable to
+    allow test environments to unlock commercial features without the
+    commercial package being importable.
+    """
+
+    commercial_version = os.environ.get("NUITKA_COMMERCIAL_VERSION")
+    if commercial_version:
+        return commercial_version
+
     try:
         from nuitka.tools.commercial import Version
     except ImportError:
